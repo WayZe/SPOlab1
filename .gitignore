@@ -1,0 +1,10 @@
+.vs
+bin
+obj
+Properties
+App.config
+Example-SIM.sln
+Example-SIM.suo
+Example-SIM.v11.suo
+Example-SIM.v12.suo
+PSS.dll
