@@ -28,6 +28,8 @@ namespace Model_Lab
         int maxNCP;
         /* Total number of measures */
         int TTN;
+        /* List of processes */
+        List<Process> processes = new List<Process>();   
 
         #endregion
 

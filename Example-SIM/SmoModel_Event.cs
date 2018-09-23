@@ -19,18 +19,6 @@ namespace Model_Lab
             // алгоритм обработки события            
             protected override void HandleEvent(ModelEventArgs args)
             {
-                Model.Tracer.EventTrace(this);
-                
-                Random rnd = new Random();
-                while (Model.currN < Model.maxN)
-                {
-                    Model.currN++;
-                    Process process = new Process(Model.currN, rnd.Next(Model.minNT, Model.maxNT), 0);
-                    var rec = new QRec(process);
-                    Model.VQ.Add(rec);
-                    Model.Tracer.AnyTrace("Добавлен процесс №" + Model.currN + "\tТакты: " + process.RNT);
-                }
-
                 while (Model.NCP < Model.maxNCP)
                 {
                     Model.TTN++;
@@ -47,7 +35,30 @@ namespace Model_Lab
                 //Model.PlanEvent(ev, 0.1);                          
                 //Model.Tracer.PlanEventTrace(ev);
                 //Model.Tracer.AnyTrace("NCP = " + Model.NCP + " maxNCP = " + Model.maxNCP);
+            }
+        }
 
+        // Класс события: Создание нового процесса
+        public class ProcessCreation : TimeModelEvent<SmoModel>
+        {
+            //#region Атрибуты события
+            //public Bid ZP;
+            //#endregion
+
+            // алгоритм обработки события            
+            protected override void HandleEvent(ModelEventArgs args)
+            {
+                Model.Tracer.EventTrace(this);
+
+                Random rnd = new Random();
+                while (Model.currN < Model.maxN)
+                {
+                    Model.currN++;
+                    Process process = new Process(Model.currN, rnd.Next(Model.minNT, Model.maxNT), 0);
+                    var rec = new QRec(process);
+                    Model.VQ.Add(rec);
+                    Model.Tracer.AnyTrace("Добавлен процесс №" + Model.currN + "\tТакты: " + process.RNT);
+                }
             }
         }
     }

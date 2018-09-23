@@ -2,6 +2,7 @@
 using CommonModel.Kernel;
 using CommonModel.RandomStreamProducing;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Model_Lab
 {
@@ -66,6 +67,15 @@ namespace Model_Lab
             PlanEvent(ev, 0.0);
 
             #endregion
+        }
+
+        void ReadFile()
+        {
+            using (StreamReader sr = new StreamReader(@"D:\Langs\C#\SPOlab1"))
+            {
+
+            }
+
         }
 
         //Действия по окончанию прогона
