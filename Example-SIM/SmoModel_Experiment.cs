@@ -12,7 +12,7 @@ namespace Model_Lab
         //Условие завершения прогона модели True - завершить прогон. По умолчанию false. </summary>
         public override bool MustStopRun(int variantCount, int runCount)
         {
-            return (maxNCP >= NCP);
+            return (processes.Count <= NCP);
         }
 
         //установка метода перебора вариантов модели
@@ -41,6 +41,7 @@ namespace Model_Lab
             maxNT = 10;
             minNT = 1;
             TTN = 0;
+            measureNumber = 0;
 
             #endregion
 
@@ -51,6 +52,12 @@ namespace Model_Lab
 
         public override void StartModelling(int variantCount, int runCount)
         {
+            ReadFile();
+            //for (int i = 0; i < processes.Count; i++)
+            //{
+            //    VQ.Add(processes[i]);
+            //}
+
             #region Задание начальных значений модельных переменных и объектов
             #endregion
 
@@ -63,7 +70,7 @@ namespace Model_Lab
 
             #region Планирование начальных событий      
 
-            var ev = new K1();
+            var ev = new FIFO();
             PlanEvent(ev, 0.0);
 
             #endregion
@@ -71,11 +78,24 @@ namespace Model_Lab
 
         void ReadFile()
         {
-            using (StreamReader sr = new StreamReader(@"D:\Langs\C#\SPOlab1"))
+            using (StreamReader sr = new StreamReader(@"/Users/andreymakarov/Downloads/SPOlab1/input.txt"))
             {
+                while (!sr.EndOfStream)
+                {
+                    String[] tmp = sr.ReadLine().Split();
+                    Process process = new Process(Convert.ToInt32(tmp[0]),
+                                                  Convert.ToInt32(tmp[1]),
+                                                  Convert.ToInt32(tmp[2]),
+                                                  0,
+                                                  Convert.ToInt32(tmp[3]));
+                    Tracer.AnyTrace("Процесс №" + process.number + 
+                                    " с временем разблокировки " + process.readinessTime + 
+                                    " временем выполнения " + process.requiredAmount + 
+                                    " приоритетом " + process.priority);
 
+                    processes.Add(process);
+                }
             }
-
         }
 
         //Действия по окончанию прогона

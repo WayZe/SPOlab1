@@ -29,7 +29,9 @@ namespace Model_Lab
         /* Total number of measures */
         int TTN;
         /* List of processes */
-        List<Process> processes = new List<Process>();   
+        List<Process> processes = new List<Process>();
+        /* Measure number */
+        int measureNumber;
 
         #endregion
 
@@ -43,36 +45,42 @@ namespace Model_Lab
         #region Дополнительные структуры
 
         /* Process */
-        public class Process
+        public class Process : QueueRecord
         {
             /* Number of process*/
-            public int NP;
+            public int number;
             /* Required number of measures for execution */
-            public int RNT;
-            // Требуемое количество квантов
-            public int CNT;
+            public int requiredAmount;
+            /* Current number of measures for execution */
+            public int currentAmount;
+            /* Priority */
+            public int priority;
+            /* Readiness time */
+            public int readinessTime;
 
-            public Process(int _NP, int _RNT, int _CNT)
+            public Process(int _number, int _readinessTime, int _requiredAmount, int _currentAmount, int _priority)
             {
-                NP = _NP;
-                RNT = _RNT;
-                CNT = _CNT;
+                number = _number;
+                requiredAmount = _requiredAmount;
+                currentAmount = _currentAmount;
+                priority = _priority;
+                readinessTime = _readinessTime;
             }
         }
 
-        // Элемент очереди заявки в узлах ВС 
-        class QRec : QueueRecord
-        {
-            public Process Z;
+        //// Элемент очереди заявки в узлах ВС 
+        //class QRec : QueueRecord
+        //{
+        //    public Process Z;
 
-            public QRec(Process _Z)
-            {
-                Z = _Z;
-            }
-        }
+        //    public QRec(Process _Z)
+        //    {
+        //        Z = _Z;
+        //    }
+        //}
 
         // Группа очередей ПП
-        SimpleModelList<QRec> VQ;
+        SimpleModelList<Process> VQ;
 
         #endregion
 
@@ -88,7 +96,7 @@ namespace Model_Lab
 
         public SmoModel(Model parent, string name) : base(parent, name)
         {
-            VQ = InitModelObject<SimpleModelList<QRec>>();
+            VQ = InitModelObject<SimpleModelList<Process>>();
         }
 
         #endregion
