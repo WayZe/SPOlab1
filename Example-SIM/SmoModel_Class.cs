@@ -30,6 +30,8 @@ namespace Model_Lab
         int TTN;
         /* List of processes */
         List<Process> processes = new List<Process>();
+        /* List of processes */
+        List<Process> waitProcesses = new List<Process>();
         /* Measure number */
         int measureNumber;
 
@@ -81,6 +83,8 @@ namespace Model_Lab
 
         // Группа очередей ПП
         SimpleModelList<Process> VQ;
+        // Группа очередей ПП
+        //SimpleModelList<Process> VQO;
 
         #endregion
 
@@ -89,7 +93,7 @@ namespace Model_Lab
         #endregion
 
         #region Генераторы ПСЧ
-        
+
         #endregion
 
         #region Инициализация объектов модели
@@ -97,6 +101,7 @@ namespace Model_Lab
         public SmoModel(Model parent, string name) : base(parent, name)
         {
             VQ = InitModelObject<SimpleModelList<Process>>();
+            //VQO = InitModelObject<SimpleModelList<Process>>();
         }
 
         #endregion

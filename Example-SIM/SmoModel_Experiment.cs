@@ -12,7 +12,7 @@ namespace Model_Lab
         //Условие завершения прогона модели True - завершить прогон. По умолчанию false. </summary>
         public override bool MustStopRun(int variantCount, int runCount)
         {
-            return (processes.Count <= NCP);
+            return (NCP >= maxNCP);
         }
 
         //установка метода перебора вариантов модели
@@ -78,8 +78,17 @@ namespace Model_Lab
 
         void ReadFile()
         {
-            using (StreamReader sr = new StreamReader(@"/Users/andreymakarov/Downloads/SPOlab1/input.txt"))
+            StreamReader sr;
+            if (Environment.OSVersion.Platform.ToString() == "Win32NT")
             {
+                sr = new StreamReader(@"D:\Langs\C#\SPOlab1\input.txt");
+
+            }
+            else
+            {
+                sr = new StreamReader(@"123");
+            }
+                Tracer.AnyTrace(Environment.OSVersion.Platform.ToString());
                 while (!sr.EndOfStream)
                 {
                     String[] tmp = sr.ReadLine().Split();
@@ -95,7 +104,8 @@ namespace Model_Lab
 
                     processes.Add(process);
                 }
-            }
+
+            waitProcesses = processes;
         }
 
         //Действия по окончанию прогона

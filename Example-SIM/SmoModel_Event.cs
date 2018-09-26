@@ -15,29 +15,55 @@ namespace Model_Lab
             // алгоритм обработки события            
             protected override void HandleEvent(ModelEventArgs args)
             {
-                for (int i = 0; i < Model.processes.Count; i++)
-                {
-                    if (Model.processes[i].readinessTime == Model.measureNumber)
+                int j = 0;
+                while (j < Model.waitProcesses.Count)
+                { 
+                    if (Model.waitProcesses[j].readinessTime >= Model.measureNumber)
                     {
-                        Model.Tracer.AnyTrace("Процесс №" + (i+1) + " добавлен в очередь");
-                        Model.VQ.Add(Model.processes[i]);
+                        Model.Tracer.AnyTrace("Процесс №" + (Model.waitProcesses[j].number + 1) + " добавлен в очередь");
+                        Model.VQ.Add(Model.waitProcesses[j]);
+                        Model.waitProcesses.RemoveAt(j);
+                        j--;
                     }
                 }
 
                 Model.VQ[0].requiredAmount--;
                 if (Model.VQ[0].requiredAmount == 0)
                 {
+
                     Model.VQ.RemoveAt(0);
                     Model.NCP++;
+                    Random rand = new Random();
+                    int index = rand.Next(0, Model.processes.Count);
+                    Model.waitProcesses.Add(Model.processes[index]);
+                    //Model.VQ.Last().readinessTime = Model.measureNumber + Model.processes[index].readinessTime;
+                    //Model.Tracer.AnyTrace("//////////////NCP = " + Model.NCP);
+                    //Model.Tracer.AnyTrace("Процесс №" + (index + 1) + " добавлен в очередь");
                 }
+
+                for (int i = 0; i < Model.VQ.Count; i++)
+                {
+                    Model.Tracer.AnyTrace(Model.VQ[i].number + " " + Model.VQ[i].readinessTime + " " + Model.VQ[i].requiredAmount);
+                }
+
+                Console.ReadLine();
 
                 Model.Tracer.AnyTrace(Model.VQ[0].requiredAmount);
 
-                var ev = new FIFO();
-                Model.PlanEvent(ev, 1.0);
-                Model.Tracer.PlanEventTrace(ev);
+                if (Model.NCP < Model.maxNCP-1)
+                {
+                    var ev = new FIFO();
+                    Model.PlanEvent(ev, 1.0);
+                    Model.Tracer.PlanEventTrace(ev);
 
-                Model.measureNumber++;
+                    Model.measureNumber++;
+                }
+                else
+                {
+                    var ev = new ProcessCreation();
+                    Model.PlanEvent(ev, 1.0);
+                    Model.Tracer.PlanEventTrace(ev);
+                }
             }
         }
 
