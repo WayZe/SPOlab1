@@ -24,6 +24,8 @@ namespace Model_Lab
         int minNT;
         /* Number of completed processes */
         int NCP;
+
+        int fifoMeasureNumber = 0;
         /* Maximum number of completed processes */
         int maxNCP;
         /* Total number of measures */
@@ -34,6 +36,8 @@ namespace Model_Lab
         List<Process> waitProcesses = new List<Process>();
         /* Measure number */
         int measureNumber;
+
+        bool isFinish = false;
 
         #endregion
 
@@ -82,9 +86,9 @@ namespace Model_Lab
         //}
 
         // Группа очередей ПП
-        SimpleModelList<Process> VQ;
+        SimpleModelList<Process> QFIFO;
         // Группа очередей ПП
-        //SimpleModelList<Process> VQO;
+        //SimpleModelList<Process> QSJF;
 
         #endregion
 
@@ -100,8 +104,8 @@ namespace Model_Lab
 
         public SmoModel(Model parent, string name) : base(parent, name)
         {
-            VQ = InitModelObject<SimpleModelList<Process>>();
-            //VQO = InitModelObject<SimpleModelList<Process>>();
+            QFIFO = InitModelObject<SimpleModelList<Process>>();
+            //QSJF = InitModelObject<SimpleModelList<Process>>();
         }
 
         #endregion

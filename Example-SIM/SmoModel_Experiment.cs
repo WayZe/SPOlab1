@@ -12,7 +12,7 @@ namespace Model_Lab
         //Условие завершения прогона модели True - завершить прогон. По умолчанию false. </summary>
         public override bool MustStopRun(int variantCount, int runCount)
         {
-            return (NCP >= maxNCP);
+            return (isFinish);
         }
 
         //установка метода перебора вариантов модели
@@ -85,27 +85,47 @@ namespace Model_Lab
 
             }
             else
+
             {
-                sr = new StreamReader(@"123");
+                sr = new StreamReader(@"/Users/andreymakarov/Downloads/SPOlab1/input.txt");
             }
-                Tracer.AnyTrace(Environment.OSVersion.Platform.ToString());
-                while (!sr.EndOfStream)
-                {
-                    String[] tmp = sr.ReadLine().Split();
-                    Process process = new Process(Convert.ToInt32(tmp[0]),
-                                                  Convert.ToInt32(tmp[1]),
-                                                  Convert.ToInt32(tmp[2]),
-                                                  0,
-                                                  Convert.ToInt32(tmp[3]));
-                    Tracer.AnyTrace("Процесс №" + process.number + 
-                                    " с временем разблокировки " + process.readinessTime + 
-                                    " временем выполнения " + process.requiredAmount + 
-                                    " приоритетом " + process.priority);
 
-                    processes.Add(process);
-                }
+            Tracer.AnyTrace(Environment.OSVersion.Platform.ToString());
+            while (!sr.EndOfStream)
+            {
+                String[] tmp = sr.ReadLine().Split();
+                Process process = new Process(Convert.ToInt32(tmp[0]),
+                                              Convert.ToInt32(tmp[1]),
+                                              Convert.ToInt32(tmp[2]),
+                                              0,
+                                              Convert.ToInt32(tmp[3]));
+                Tracer.AnyTrace("Процесс №" + process.number + 
+                                " с временем разблокировки " + process.readinessTime + 
+                                " временем выполнения " + process.requiredAmount + 
+                                " приоритетом " + process.priority);
 
-            waitProcesses = processes;
+                processes.Add(process);
+            }
+
+            foreach (Process process in processes)
+            {
+                waitProcesses.Add(new Process(process.number, 
+                                              process.readinessTime, 
+                                              process.requiredAmount, 
+                                              0,
+                                              process.priority));
+            }
+
+            //waitProcesses[0].requiredAmount--;
+
+            Tracer.AnyTrace("==================================================");
+            foreach (Process process in processes)
+            {
+                Tracer.AnyTrace("Процесс №" + (process.number) + " добавлен в очередь" +
+  " " + (process.readinessTime) + " " + (process.requiredAmount));
+            }
+            Tracer.AnyTrace("===================================================");
+            Tracer.AnyTrace(waitProcesses.Count + " " + processes.Count);
         }
 
         //Действия по окончанию прогона
@@ -117,7 +137,8 @@ namespace Model_Lab
             Tracer.TraceOut("==============================================================");
             Tracer.AnyTrace("");
 
-            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора " + TTN);
+            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для FIFO: " + (fifoMeasureNumber-1));
+            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для SJF: " + (measureNumber-1));
             //Tracer.TraceOut("Время моделирования: " + String.Format("{0:0.00}", Time));
 
         }
