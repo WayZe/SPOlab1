@@ -47,16 +47,25 @@ namespace Model_Lab
 
             #region Установка параметров законов распределения
 
+            //(generator.BPN as GeneratedBaseRandomStream).Seed = 1;
+            //generator.A = 0;
+            //generator.B = 2;
+
             #endregion
         }
 
         public override void StartModelling(int variantCount, int runCount)
         {
+            //GenerateFile1();
+
             ReadFile();
-            //for (int i = 0; i < processes.Count; i++)
-            //{
-            //    VQ.Add(processes[i]);
-            //}
+
+            GenerateFile2();
+
+            for (int i = 0; i < processes.Count; i++)
+            {
+                processesStates.Add("-");
+            }
 
             #region Задание начальных значений модельных переменных и объектов
             #endregion
@@ -76,6 +85,35 @@ namespace Model_Lab
             #endregion
         }
 
+        void GenerateFile1()
+        {
+            StreamWriter sw;
+            if (Environment.OSVersion.Platform.ToString() == "Win32NT")
+            {
+                sw = new StreamWriter(@"D:\Langs\C#\SPOlab1\input.txt");
+
+            }
+            else
+            {
+                String tmp = @"/Users/andreymakarov/Downloads/SPOlab1/input.txt";
+                sw = new StreamWriter(tmp);
+            }
+
+            Random rand = new Random();
+            for (int i = 0; i < 3; i++)
+            {
+                Process process = new Process(i + 1,
+                                              rand.Next(0, 10),
+                                              rand.Next(1, 10),
+                                              0
+                );
+                sw.WriteLine(process.number.ToString() + " " + process.readinessTime.ToString() + " " +
+                                         process.requiredAmount.ToString() + " " + process.priority.ToString());
+                sw.Flush();
+            }
+            sw.Close();
+        }
+
         void ReadFile()
         {
             StreamReader sr;
@@ -90,14 +128,13 @@ namespace Model_Lab
                 sr = new StreamReader(@"/Users/andreymakarov/Downloads/SPOlab1/input.txt");
             }
 
-            Tracer.AnyTrace(Environment.OSVersion.Platform.ToString());
+            Tracer.AnyTrace("Исходные процессы:\n");
             while (!sr.EndOfStream)
             {
                 String[] tmp = sr.ReadLine().Split();
                 Process process = new Process(Convert.ToInt32(tmp[0]),
                                               Convert.ToInt32(tmp[1]),
                                               Convert.ToInt32(tmp[2]),
-                                              0,
                                               Convert.ToInt32(tmp[3]));
                 Tracer.AnyTrace("Процесс №" + process.number + 
                                 " с временем разблокировки " + process.readinessTime + 
@@ -112,20 +149,51 @@ namespace Model_Lab
                 waitProcesses.Add(new Process(process.number, 
                                               process.readinessTime, 
                                               process.requiredAmount, 
-                                              0,
                                               process.priority));
             }
+        }
 
-            //waitProcesses[0].requiredAmount--;
-
-            Tracer.AnyTrace("==================================================");
-            foreach (Process process in processes)
+        void GenerateFile2()
+        {
+            StreamWriter sw;
+            if (Environment.OSVersion.Platform.ToString() == "Win32NT")
             {
-                Tracer.AnyTrace("Процесс №" + (process.number) + " добавлен в очередь" +
-  " " + (process.readinessTime) + " " + (process.requiredAmount));
+                sw = new StreamWriter(@"D:\Langs\C#\SPOlab1\input2.txt");
+
             }
-            Tracer.AnyTrace("===================================================");
-            Tracer.AnyTrace(waitProcesses.Count + " " + processes.Count);
+            else
+            {
+                String tmp = @"/Users/andreymakarov/Downloads/SPOlab1/input2.txt";
+                sw = new StreamWriter(tmp);
+            }
+
+            for (int i = 0; i < processes.Count; i++)
+            {
+                sw.WriteLine(processes[i].number.ToString() + " " + processes[i].readinessTime.ToString() + " " +
+                                         processes[i].requiredAmount.ToString() + " " + processes[i].priority.ToString());
+                sw.Flush();
+                allProcesses.Add(new Process(processes[i].number, processes[i].readinessTime,
+                                         processes[i].requiredAmount, processes[i].priority));
+            }
+
+            Random rand = new Random();
+            for (int i = 0; i < maxNCP - processes.Count; i++)
+            {
+               
+                int index = rand.Next(0, processes.Count);
+
+
+                sw.WriteLine(processes[index].number + " " +
+                             processes[index].readinessTime + " " +
+                             processes[index].requiredAmount + " " +
+                             processes[index].priority);
+                sw.Flush();
+                allProcesses.Add(new Process(processes[index].number, processes[index].readinessTime,
+                                             processes[index].requiredAmount, processes[index].priority));
+
+                allSjfProcesses.Add(new Process(processes[index].number, processes[index].readinessTime,
+                             processes[index].requiredAmount, processes[index].priority));
+            }
         }
 
         //Действия по окончанию прогона
@@ -137,8 +205,8 @@ namespace Model_Lab
             Tracer.TraceOut("==============================================================");
             Tracer.AnyTrace("");
 
-            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для FIFO: " + (fifoMeasureNumber-1));
-            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для SJF: " + (measureNumber-1));
+            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для FIFO: " + (fifoMeasureNumber));
+            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для SJF: " + (measureNumber));
             //Tracer.TraceOut("Время моделирования: " + String.Format("{0:0.00}", Time));
 
         }
