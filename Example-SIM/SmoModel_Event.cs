@@ -9,16 +9,14 @@ namespace Model_Lab
 {
     public partial class SmoModel : Model
     {
-        // Класс события: срабатывание такта процессора для FIFO
+        // Event class: processor tick
         public class FIFO : TimeModelEvent<SmoModel>
-        {
-            // алгоритм обработки события            
+        {       
             protected override void HandleEvent(ModelEventArgs args)
             {
+                /* Adding processes in [QFIFO] */
                 while (Model.QFIFO.Count < Model.processes.Count && Model.allProcesses.Count > 0)
                 {
-                    //Model.Tracer.AnyTrace("Процесс №" + (Model.allProcesses[0].number) + " добавлен в очередь" + 
-                    //" " + (Model.allProcesses[0].readinessTime) + " " + (Model.allProcesses[0].requiredAmount));
                     Model.QFIFO.Add(new Process(Model.allProcesses[0].number,
                                                 /*Model.measureNumber*/ +Model.allProcesses[0].readinessTime,
                                                 Model.allProcesses[0].requiredAmount,
@@ -26,25 +24,30 @@ namespace Model_Lab
                     Model.allProcesses.RemoveAt(0);
                 }
 
+                /* Queue is not empty */
                 if (Model.QFIFO.Count != 0)
                 {
-                    String outString = Model.measureNumber.ToString();
+                    /* Printing of base tracing */
+                    String outString = Model.tickNumber.ToString();
                     for (int i = 0; i < Model.processes.Count; i++)
                     {
                         bool isProcess = false;
                         for (int j = 0; j < Model.QFIFO.Count; j++)
                         {
-                            if (Model.QFIFO[j].readinessTime <= Model.measureNumber)
+                            /* Process is ready */
+                            if (Model.QFIFO[j].readinessTime <= Model.tickNumber)
                             {
+                                /* Process found in [QFIFO] */
                                 if (Model.processes[i].number == Model.QFIFO[j].number)
                                 {
-                                    //Model.Tracer.AnyTrace("123");
+                                    /* Process is first in [QFIFO] */
                                     if (j == 0)
                                     {
                                         isProcess = true;
                                         outString += " В";
                                         break;
                                     }
+                                    /* Process is not first in [QFIFO] */
                                     else
                                     {
                                         isProcess = true;
@@ -52,12 +55,8 @@ namespace Model_Lab
                                         break;
                                     }
                                 }
-                                else
-                                {
-                                    //outString += " -";
-                                    //Model.Tracer.AnyTrace(" " + Model.processes[i].number + " " + Model.QFIFO[j].number);
-                                }
                             }
+                            /* Process is not ready */
                             else
                             {
                                 isProcess = true;
@@ -65,6 +64,7 @@ namespace Model_Lab
                                 break;
                             }
                         }
+                        /* Process not found in [QFIFO] */
                         if (!isProcess)
                         {
                             outString += " -";
@@ -97,7 +97,8 @@ namespace Model_Lab
                 //    }
                 //}
 
-                if (Model.QFIFO[0].readinessTime <= Model.measureNumber)
+                /* Process is ready */
+                if (Model.QFIFO[0].readinessTime <= Model.tickNumber)
                 {
                     Model.QFIFO[0].requiredAmount--;
                     /* First process is completed */
@@ -124,16 +125,15 @@ namespace Model_Lab
                     }
                 }
 
-                    /* Printing queue */
-                    //for (int i = 0; i < Model.QFIFO.Count; i++)
-                    //{
-                    //    Model.Tracer.AnyTrace(Model.QFIFO[i].number + " " + Model.QFIFO[i].readinessTime + " " + Model.QFIFO[i].requiredAmount);
-                    //}
+                /* Printing queue */
+                for (int i = 0; i < Model.QFIFO.Count; i++)
+                {
+                    Model.Tracer.AnyTrace(Model.QFIFO[i].number + " " + Model.QFIFO[i].readinessTime + " " + Model.QFIFO[i].requiredAmount);
+                }
 
-                    //Model.Tracer.AnyTrace(Model.VQ[0].requiredAmount);
+                Model.tickNumber++;
 
-                Model.measureNumber++;
-
+                /* All processes did not end */
                 if (Model.NCP < Model.maxNCP)
                 {
                     var ev = new FIFO();
@@ -141,17 +141,20 @@ namespace Model_Lab
                     //Model.Tracer.PlanEventTrace(ev);
                     Model.Tracer.AnyTrace("");
                 }
+                /* All processes ended; transition to SJF */
                 else
                 {
                     var ev = new SJF();
                     Model.PlanEvent(ev, 1.0);
-                    Model.Tracer.AnyTrace("// SJF //\n");
+                    Model.Tracer.AnyTrace("\n// SJF //\n");
 
+                    /* Cleaning of variables */
                     Model.waitProcesses.Clear();
-                    Model.fifoMeasureNumber = Model.measureNumber;
-                    Model.measureNumber = 0;
+                    Model.fifoTickNumber = Model.tickNumber;
+                    Model.tickNumber = 0;
                     Model.NCP = 0;
 
+                    /* Initializing of processes start list for SJF */
                     foreach (Process process in Model.processes)
                     {
                         Model.waitProcesses.Add(new Process(process.number,
@@ -163,21 +166,20 @@ namespace Model_Lab
             }
         }
 
-        // Класс события: срабатывание такта процессора для SJF
+        // Event class: processor tick
         public class SJF : TimeModelEvent<SmoModel>
-        {
-            // алгоритм обработки события            
+        {       
             protected override void HandleEvent(ModelEventArgs args)
             {
-                //Model.Tracer.AnyTrace("Такт №" + Model.measureNumber);
-                /* Выбор первого процесса с временем готовности меньшим либо равным текущему такту*/
+                String outString = Model.tickNumber.ToString();
+                /* Selecting of first process with the shortest readiness time or equal to it  */
                 int i = 0;
                 int minLength = -1;
                 int minProcNumber = -1;
                 int minReadinessTime = -1;
                 for (i = 0; i < Model.waitProcesses.Count; i++)
                 {
-                    if (Model.waitProcesses[i].readinessTime <= Model.measureNumber)
+                    if (Model.waitProcesses[i].readinessTime <= Model.tickNumber)
                     {
                         minLength = Model.waitProcesses[i].requiredAmount;
                         minProcNumber = i;
@@ -188,10 +190,11 @@ namespace Model_Lab
 
                 if (minLength != -1)
                 {
-                    /* Выбор процесса с минимальной длиной и таким же или меньшим временем готовности */
+                    /* Selecting of process with minimal length and equal or less readiness time */
                     for (int j = i + 1; j < Model.waitProcesses.Count; j++)
                     {
-                        if (Model.waitProcesses[j].readinessTime <= Model.measureNumber)
+                        /* Process is ready */
+                        if (Model.waitProcesses[j].readinessTime <= Model.tickNumber)
                         {
                             if (Model.waitProcesses[j].requiredAmount < minLength)
                             {
@@ -211,7 +214,7 @@ namespace Model_Lab
                     /*  */
                     for (int j = 0; j < Model.waitProcesses.Count; j++)
                     {
-                        if (Model.waitProcesses[j].readinessTime <= Model.measureNumber)
+                        if (Model.waitProcesses[j].readinessTime <= Model.tickNumber)
                         {
                             if ((Model.waitProcesses[j].requiredAmount == minLength && Model.waitProcesses[j].readinessTime < minReadinessTime))
                             {
@@ -222,60 +225,63 @@ namespace Model_Lab
                         }
                     }
 
-                    //Model.Tracer.AnyTrace(minProcNumber + " " + (Model.waitProcesses[0].number - 1));
+                    /* [waitProcess] is not empty */
                     if (Model.waitProcesses.Count != 0)
                     {
-                        String outString = Model.measureNumber.ToString();
-                        //bool isFirstMinProc = true;
-                        //int newMinProcNumber = Model.waitProcesses[minProcNumber].number - 1;
-
-                        //Model.Tracer.AnyTrace(minProcNumber + " " + newMinProcNumber);
+                        /* Printing base tracing */
                         for (int j = 0; j < Model.processes.Count; j++)
                         {
                             bool isProcess = false;
+                            bool isBlockedProcess = false;
                             for (int k = 0; k < Model.waitProcesses.Count; k++)
                             {
-                                bool isBlockedProcess = true;
-                                if (Model.waitProcesses[k].readinessTime <= Model.measureNumber)
+                                /* There is current process from [waitProcesses] in [processes] */
+                                if (Model.processes[j].number == Model.waitProcesses[k].number)
                                 {
-                                    Model.Tracer.AnyTrace(Model.processes[j].number + " " + Model.waitProcesses[k].number);
-                                    if (Model.processes[j].number == Model.waitProcesses[k].number)
+                                    /* Current process is ready */
+                                    if (Model.waitProcesses[k].readinessTime <= Model.tickNumber)
                                     {
-                                        Model.Tracer.AnyTrace(Model.waitProcesses[minProcNumber].number - 1 + " " + k + " " + minProcNumber);
-                                        if (k == Model.waitProcesses[minProcNumber].number - 1)
+                                        /* Current process has minimal length */
+                                        if (j == Model.waitProcesses[minProcNumber].number - 1)
                                         {
                                             outString += " В";
                                             isProcess = true;
-                                            isBlockedProcess = false;
                                             break;
                                         }
+                                        /* Current process does not have minimal length */
                                         else
                                         {
                                             outString += " Г";
                                             isProcess = true;
-                                            isBlockedProcess = false;
                                             break;
                                         }
                                     }
+                                    /* Current process is not ready */
+                                    else
+                                    {
+                                            isBlockedProcess = true;
+                                            isProcess = true;
+                                    }
                                 }
-                                //if (isBlockedProcess)
-                                //{
-                                //    outString += " Б";
-                                //    isProcess = true;
-                                //    //break;
-                                //}
                             }
 
-                            if (!isProcess)
+                            /* Current process is blocked */
+                            if (isBlockedProcess)
                             {
                                 outString += " Б";
+                            }
+
+                            /* [waitProcesses] does not have current process */
+                            if (!isProcess)
+                            {
+                                outString += " -";
                             }
                         }
                         Model.Tracer.AnyTrace(outString);
                     }
 
-
                     Model.waitProcesses[minProcNumber].requiredAmount--;
+                    /* One of the processes ended */
                     if (Model.waitProcesses[minProcNumber].requiredAmount == 0)
                     {
                         Model.waitProcesses.RemoveAt(minProcNumber);
@@ -283,6 +289,7 @@ namespace Model_Lab
                         //Random rand = new Random();
                         //int index = rand.Next(0, Model.processes.Count);
 
+                        /* Adding new process */
                         if (Model.allSjfProcesses.Count > 0)
                         {
                             Model.waitProcesses.Add(new Process(Model.allSjfProcesses[0].number,
@@ -290,17 +297,42 @@ namespace Model_Lab
                                                                 Model.allSjfProcesses[0].requiredAmount,
                                                                 Model.allSjfProcesses[0].priority));
                             Model.allSjfProcesses.RemoveAt(0);
-
-                            //Model.waitProcesses.Last().readinessTime = Model.measureNumber + Model.processes[0].readinessTime;
-
-                            //Model.Tracer.AnyTrace("Процесс №" + (Model.waitProcesses.Last().number) + " добавлен в очередь" +
-                            //" " + (Model.waitProcesses.Last().readinessTime) + " " + (Model.waitProcesses.Last().requiredAmount));
                         }
                     }
                 }
+                /* [waitProcess] does not have ready process */
                 else
                 {
-                    Model.Tracer.AnyTrace(Model.measureNumber.ToString() + " - - -");
+                    List<bool> isProcesses = new List<bool>();
+                    for (int j = 0; j < Model.waitProcesses.Count; j++)
+                    {
+                        for (int k = 0; k < Model.waitProcesses.Count; k++)
+                        {
+                            if (j == Model.waitProcesses[k].number - 1)
+                            {
+                                isProcesses.Add(true);
+                            }
+                        }
+
+                        if (isProcesses.Count < j+1)
+                        {
+                            isProcesses.Add(false);
+                        }
+                    }
+
+                    for (int j = 0; j < Model.waitProcesses.Count; j++)
+                    {
+                        if (isProcesses[j])
+                        {
+                            outString += " Б";
+                        }
+                        else
+                        {
+                            outString += " -";
+                        }
+                    }
+
+                    Model.Tracer.AnyTrace(outString);
                 }
 
                 /* Printing queue */
@@ -309,21 +341,18 @@ namespace Model_Lab
                     Model.Tracer.AnyTrace(Model.waitProcesses[k].number + " " + Model.waitProcesses[k].readinessTime + " " + Model.waitProcesses[k].requiredAmount);
                 }
 
-                //Model.Tracer.AnyTrace(Model.waitProcesses.Count + " " + minProcNumber);
+                Model.tickNumber++;
 
-
-                Model.measureNumber++;
-
+                /* All processes did not end */
                 if (Model.NCP < Model.maxNCP)
                 {
                     var ev = new SJF();
                     Model.PlanEvent(ev, 1.0);
-                    //Model.Tracer.PlanEventTrace(ev);
                     Model.Tracer.AnyTrace("");
                 }
+                /* End of program */
                 else
                 {
-                    //Model.measureNumber--;
                     Model.isFinish = true;
                 }
             }

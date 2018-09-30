@@ -36,12 +36,7 @@ namespace Model_Lab
 
             maxNCP = 10;
             NCP = 0;
-            maxN = 10;
-            currN = 0;
-            maxNT = 10;
-            minNT = 1;
-            TTN = 0;
-            measureNumber = 0;
+            tickNumber = 0;
 
             #endregion
 
@@ -56,7 +51,7 @@ namespace Model_Lab
 
         public override void StartModelling(int variantCount, int runCount)
         {
-            //GenerateFile1();
+            GenerateFile1();
 
             ReadFile();
 
@@ -205,8 +200,8 @@ namespace Model_Lab
             Tracer.TraceOut("==============================================================");
             Tracer.AnyTrace("");
 
-            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для FIFO: " + (fifoMeasureNumber));
-            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для SJF: " + (measureNumber));
+            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для FIFO: " + (fifoTickNumber));
+            Tracer.AnyTrace("Суммарное количество затраченных тактов процессора для SJF: " + (tickNumber));
             //Tracer.TraceOut("Время моделирования: " + String.Format("{0:0.00}", Time));
 
         }

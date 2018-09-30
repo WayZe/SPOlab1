@@ -16,20 +16,11 @@ namespace Model_Lab
 
         #region Параметры модель
 
-        /* Maximum number of processes */
-        int maxN;
-        /* Maximum number of measures for one process execution */
-        int maxNT;
-        /* Minimal number of measures for one process execution */
-        int minNT;
         /* Number of completed processes */
         int NCP;
-
-        int fifoMeasureNumber = 0;
+        int fifoTickNumber = 0;
         /* Maximum number of completed processes */
         int maxNCP;
-        /* Total number of measures */
-        int TTN;
         /* List of processes */
         List<Process> processes = new List<Process>();
         /* List of processes */
@@ -40,17 +31,10 @@ namespace Model_Lab
         List<Process> allSjfProcesses = new List<Process>();
 
         List<String> processesStates = new List<String>();
-        /* Measure number */
-        int measureNumber;
+        /* Tick number */
+        int tickNumber;
 
         bool isFinish = false;
-
-        #endregion
-
-        #region Переменные состояния модели
-
-        /* Current number of processes */
-        int currN;
 
         #endregion
 
@@ -61,7 +45,7 @@ namespace Model_Lab
         {
             /* Number of process*/
             public int number;
-            /* Required number of measures for execution */
+            /* Required number of ticks for execution */
             public int requiredAmount;
             /* Priority */
             public int priority;
@@ -77,31 +61,12 @@ namespace Model_Lab
             }
         }
 
-        //// Элемент очереди заявки в узлах ВС 
-        //class QRec : QueueRecord
-        //{
-        //    public Process Z;
-
-        //    public QRec(Process _Z)
-        //    {
-        //        Z = _Z;
-        //    }
-        //}
-
-        // Группа очередей ПП
+        /* Queue for FIFO */
         SimpleModelList<Process> QFIFO;
-        // Группа очередей ПП
-        //SimpleModelList<Process> QSJF;
 
         #endregion
 
         #region Cборщики статистики
-
-        #endregion
-
-        #region Генераторы ПСЧ
-
-        //UniformStream generator;
 
         #endregion
 
@@ -110,7 +75,6 @@ namespace Model_Lab
         public SmoModel(Model parent, string name) : base(parent, name)
         {
             QFIFO = InitModelObject<SimpleModelList<Process>>();
-            //QSJF = InitModelObject<SimpleModelList<Process>>();
         }
 
         #endregion
