@@ -34,7 +34,14 @@ namespace Model_Lab
         /* Tick number */
         int tickNumber;
 
+        List<String> fifoTrace = new List<String>();
+        List<String> sjfTrace = new List<String>();
+
+        int fifoWaitTime = 0;
+        int fifoExecTime = 0;
+
         bool isFinish = false;
+        bool newProcess = false;
 
         #endregion
 
