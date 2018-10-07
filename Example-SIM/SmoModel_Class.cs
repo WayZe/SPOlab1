@@ -40,6 +40,9 @@ namespace Model_Lab
         int fifoWaitTime = 0;
         int fifoExecTime = 0;
 
+        int sjfWaitTime = 0;
+        int sjfExecTime = 0;
+
         bool isFinish = false;
         bool newProcess = false;
 

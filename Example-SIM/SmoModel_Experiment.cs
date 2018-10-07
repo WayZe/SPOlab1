@@ -62,6 +62,12 @@ namespace Model_Lab
                 processesStates.Add("-");
             }
 
+            int tactsSum = 0;
+            for (int i = 0; i < allProcesses.Count; i++)
+            {
+                tactsSum += allProcesses[i].requiredAmount;
+            }
+
             #region Задание начальных значений модельных переменных и объектов
             #endregion
 

@@ -15,22 +15,40 @@ namespace Model_Lab
         {       
             protected override void HandleEvent(ModelEventArgs args)
             {
-                 /* Adding processes in [QFIFO] */
+                String outString = "";
+                int count = 0;
+                /* Adding processes in [QFIFO] */
                 while (Model.QFIFO.Count < Model.processes.Count && Model.allProcesses.Count > 0)
                 {
-                    Model.QFIFO.Add(new Process(Model.allProcesses[0].number,
-                                                /*Model.measureNumber*/ Model.allProcesses[0].readinessTime,
-                                                Model.allProcesses[0].requiredAmount,
-                                                Model.allProcesses[0].priority));
-                    Model.allProcesses.RemoveAt(0);
+                    for (int i = 0; i < Model.allProcesses.Count; i++)
+                    {
+                        if (Model.allProcesses[i].readinessTime <= Model.tickNumber)
+                        {
+                            Model.QFIFO.Add(new Process(Model.allProcesses[i].number,
+                                                        /*Model.measureNumber*/ Model.allProcesses[i].readinessTime,
+                                                        Model.allProcesses[i].requiredAmount,
+                                                        Model.allProcesses[i].priority));
+                            Model.allProcesses.RemoveAt(i);
+                            break;
+                        }
+                    }
+
+                    count++;
+                    if (count == 3)
+                    {
+                        break;
+                    }
                 }
+
+
+                Model.Tracer.AnyTrace("123");
 
                 /* Queue is not empty */
                 if (Model.QFIFO.Count != 0)
                 {
                     //Model.newProcess = true;
                     /* Printing of base tracing */
-                    String outString = Model.tickNumber.ToString();
+                    outString = Model.tickNumber.ToString();
                     for (int i = 0; i < Model.processes.Count; i++)
                     {
                         bool isProcess = false;
@@ -84,7 +102,7 @@ namespace Model_Lab
                         Model.Tracer.AnyTrace(outString + "\n" + elems2.Length);
                         for (int i = 1; i < elems2.Length; i++)
                         {
-                            if (Model.newProcess || Model.fifoTrace.Count == 0 || elems1[i] != elems2[i])
+                            if (Model.newProcess || Model.fifoTrace.Count == 0 || elems1[i] != elems2[i] || Model.tickNumber == 0)
                             {
                                 Model.fifoTrace.Add(outString);
                                 break;
@@ -100,75 +118,97 @@ namespace Model_Lab
                     //{
                     //    Model.fifoTrace.Add(outString);
                     //}
-                }
-                /* Adding expected process in queue */
-                //Model.Tracer.AnyTrace("Такт №" + Model.measureNumber);
-                //int j = 0;
-                //if (Model.allProcesses.Count > 0)
-                //{
-                //    while (j < Model.allProcesses.Count)
-                //    {
-                //        if (Model.allProcesses[j].readinessTime <= Model.measureNumber)
-                //        {
-                //            Model.Tracer.AnyTrace("Процесс №" + (Model.allProcesses[j].number) + " добавлен в очередь" + 
-                //                                  " " + (Model.allProcesses[j].readinessTime) + " " + (Model.allProcesses[j].requiredAmount));
+                    /* Adding expected process in queue */
+                    //Model.Tracer.AnyTrace("Такт №" + Model.measureNumber);
+                    //int j = 0;
+                    //if (Model.allProcesses.Count > 0)
+                    //{
+                    //    while (j < Model.allProcesses.Count)
+                    //    {
+                    //        if (Model.allProcesses[j].readinessTime <= Model.measureNumber)
+                    //        {
+                    //            Model.Tracer.AnyTrace("Процесс №" + (Model.allProcesses[j].number) + " добавлен в очередь" + 
+                    //                                  " " + (Model.allProcesses[j].readinessTime) + " " + (Model.allProcesses[j].requiredAmount));
 
-                //            Model.QFIFO.Add(
-                //            new Process(Model.allProcesses[j].number,
-                //                        Model.allProcesses[j].readinessTime,
-                //                        Model.allProcesses[j].requiredAmount,
-                //                        Model.allProcesses[j].priority));
-                //            Model.allProcesses.RemoveAt(j);
+                    //            Model.QFIFO.Add(
+                    //            new Process(Model.allProcesses[j].number,
+                    //                        Model.allProcesses[j].readinessTime,
+                    //                        Model.allProcesses[j].requiredAmount,
+                    //                        Model.allProcesses[j].priority));
+                    //            Model.allProcesses.RemoveAt(j);
 
-                //            j--;
-                //        }
-                //        j++;
-                //    }
-                //}
+                    //            j--;
+                    //        }
+                    //        j++;
+                    //    }
+                    //}
 
-                /* Process is ready */
-                if (Model.QFIFO[0].readinessTime <= Model.tickNumber)
-                {
-                    Model.QFIFO[0].requiredAmount--;
-
-                    if (Model.QFIFO[0].requiredAmount == 0)
+                    /* Process is ready */
+                    if (Model.QFIFO[0].readinessTime <= Model.tickNumber)
                     {
-                        Model.newProcess = true;
+                        Model.QFIFO[0].requiredAmount--;
+
+                        if (Model.QFIFO[0].requiredAmount == 0)
+                        {
+                            Model.newProcess = true;
+                        }
+                        else
+                        {
+                            Model.newProcess = false;
+                        }
+
+                        /* First process is completed */
+                        if (Model.QFIFO[0].requiredAmount == 0)
+                        {
+                            Model.QFIFO.RemoveAt(0);
+                            Model.NCP++;
+
+                            //if (Model.allProcesses.Count > 0)
+                            //{
+                            //    Random rand = new Random();
+                            //    int index = rand.Next(0, Model.processes.Count);
+
+                            //    //Model.Tracer.AnyTrace("GПроцесс №" + (Model.processes[index].number) + " добавлен в очередь" +
+                            //    //" " + (Model.processes[index].readinessTime) + " " + (Model.processes[index].requiredAmount));
+
+                            //    Model.waitProcesses.Add(new Process(Model.allProcesses[index].number,
+                            //                                        Model.measureNumber + Model.allProcesses[index].readinessTime,
+                            //                                        Model.allProcesses[index].requiredAmount,
+                            //                                        Model.allProcesses[index].priority));
+
+                            //    //Model.waitProcesses.Last().readinessTime = Model.measureNumber + Model.processes[index].readinessTime;
+                            //}
+                        }
+
+                    }
+
+                    /* Printing queue */
+                    for (int i = 0; i < Model.QFIFO.Count; i++)
+                    {
+                        Model.Tracer.AnyTrace(Model.QFIFO[i].number + " " + Model.QFIFO[i].readinessTime + " " + Model.QFIFO[i].requiredAmount);
+                    }
+                }
+                else
+                {
+                    if (Model.fifoTrace.Count != 0)
+                    {
+                        String[] parts = Model.fifoTrace[Model.fifoTrace.Count - 1].Split();
+                        String tmp = "";
+                        for (int i = 1; i < parts.Length; i++)
+                        {
+                            tmp += " " + parts[i];
+                        }
+
+                        if (tmp != " Б Б Б")
+                        {
+                            Model.fifoTrace.Add(Model.tickNumber.ToString() + " Б Б Б");
+
+                        }
                     }
                     else
                     {
-                        Model.newProcess = false;
+                        Model.fifoTrace.Add(Model.tickNumber.ToString() + " Б Б Б");
                     }
-
-                    /* First process is completed */
-                    if (Model.QFIFO[0].requiredAmount == 0)
-                    {
-                        Model.QFIFO.RemoveAt(0);
-                        Model.NCP++;
-
-                        //if (Model.allProcesses.Count > 0)
-                        //{
-                        //    Random rand = new Random();
-                        //    int index = rand.Next(0, Model.processes.Count);
-
-                        //    //Model.Tracer.AnyTrace("GПроцесс №" + (Model.processes[index].number) + " добавлен в очередь" +
-                        //    //" " + (Model.processes[index].readinessTime) + " " + (Model.processes[index].requiredAmount));
-
-                        //    Model.waitProcesses.Add(new Process(Model.allProcesses[index].number,
-                        //                                        Model.measureNumber + Model.allProcesses[index].readinessTime,
-                        //                                        Model.allProcesses[index].requiredAmount,
-                        //                                        Model.allProcesses[index].priority));
-
-                        //    //Model.waitProcesses.Last().readinessTime = Model.measureNumber + Model.processes[index].readinessTime;
-                        //}
-                    }
-
-                }
-
-                /* Printing queue */
-                for (int i = 0; i < Model.QFIFO.Count; i++)
-                {
-                    Model.Tracer.AnyTrace(Model.QFIFO[i].number + " " + Model.QFIFO[i].readinessTime + " " + Model.QFIFO[i].requiredAmount);
                 }
 
                 Model.tickNumber++;
@@ -184,6 +224,10 @@ namespace Model_Lab
                 /* All processes ended; transition to SJF */
                 else
                 {
+                    if (outString != Model.fifoTrace[Model.fifoTrace.Count - 1])
+                    {
+                        Model.fifoTrace.Add(outString);
+                    }
                     var ev = new SJF();
                     Model.PlanEvent(ev, 1.0);
                     Model.Tracer.AnyTrace("\n// SJF //\n");
@@ -287,12 +331,14 @@ namespace Model_Lab
                                         {
                                             outString += " В";
                                             isProcess = true;
+                                            Model.sjfExecTime++;
                                             break;
                                         }
                                         /* Current process does not have minimal length */
                                         else
                                         {
                                             outString += " Г";
+                                            Model.sjfWaitTime++;
                                             isProcess = true;
                                             break;
                                         }
@@ -417,6 +463,10 @@ namespace Model_Lab
                 /* End of program */
                 else
                 {
+                    if (outString != Model.fifoTrace[Model.fifoTrace.Count - 1])
+                    {
+                        Model.sjfTrace.Add(outString);
+                    }
                     PrintShortTrace();
                     Model.isFinish = true;
                 }
@@ -432,7 +482,7 @@ namespace Model_Lab
                 }
                 else
                 {
-                    sw = new StreamWriter(@"/Users/andreymakarov/Downloads/SPOlab1/Example-SIM/bin/Debug/input.txt");
+                    sw = new StreamWriter(@"/Users/andreymakarov/Downloads/SPOlab1/trace2.txt");
                 }
 
                 sw.WriteLine("FIFO");
@@ -464,6 +514,10 @@ namespace Model_Lab
                 sw.WriteLine("Время ожидания FIFO: " + (double)Model.fifoWaitTime / Model.maxNCP);
                 sw.Flush();
                 sw.WriteLine("Время выполнения FIFO: " + (double)Model.fifoExecTime / Model.maxNCP);
+                sw.Flush();
+                sw.WriteLine("Время ожидания FIFO: " + (double)Model.sjfWaitTime / Model.maxNCP);
+                sw.Flush();
+                sw.WriteLine("Время выполнения FIFO: " + (double)Model.sjfExecTime / Model.maxNCP);
                 sw.Flush();
                 sw.Close();
             }
