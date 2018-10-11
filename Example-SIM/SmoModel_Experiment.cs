@@ -34,9 +34,10 @@ namespace Model_Lab
         {
             #region Параметры модели
 
-            maxNCP = 10;
+            maxNCP = 20;
             NCP = 0;
             tickNumber = 0;
+            uniqueProcessAmount = 3;
 
             #endregion
 
@@ -101,7 +102,7 @@ namespace Model_Lab
             }
 
             Random rand = new Random();
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < uniqueProcessAmount; i++)
             {
                 Process process = new Process(i + 1,
                                               rand.Next(0, 10),

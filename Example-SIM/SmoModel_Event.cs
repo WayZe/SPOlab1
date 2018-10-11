@@ -24,12 +24,26 @@ namespace Model_Lab
                     {
                         if (Model.allProcesses[i].readinessTime <= Model.tickNumber)
                         {
-                            Model.QFIFO.Add(new Process(Model.allProcesses[i].number,
-                                                        /*Model.measureNumber*/ Model.allProcesses[i].readinessTime,
-                                                        Model.allProcesses[i].requiredAmount,
-                                                        Model.allProcesses[i].priority));
-                            Model.allProcesses.RemoveAt(i);
-                            break;
+                            bool isProcessWithCurrentNumber = false;
+
+                            for (int j = 0; j < Model.QFIFO.Count; j++)
+                            {
+                                if (Model.allProcesses[i].number == Model.QFIFO[j].number)
+                                {
+                                    isProcessWithCurrentNumber = true;
+                                    break;
+                                }
+                            }
+
+                            if (!isProcessWithCurrentNumber)
+                            {
+                                Model.QFIFO.Add(new Process(Model.allProcesses[i].number,
+                                                            /*Model.tickNumber + */Model.allProcesses[i].readinessTime,
+                                                            Model.allProcesses[i].requiredAmount,
+                                                            Model.allProcesses[i].priority));
+                                Model.allProcesses.RemoveAt(i);
+                                break;
+                            }
                         }
                     }
 
@@ -86,10 +100,11 @@ namespace Model_Lab
                                 break;
                             }
                         }
-                        /* Process not found in [QFIFO] */
+                        /* Process is not found in [QFIFO] */
                         if (!isProcess)
                         {
-                            outString += " -";
+                            // -
+                            outString += " Б";
                         }
                     }
 
@@ -142,6 +157,7 @@ namespace Model_Lab
                     //        j++;
                     //    }
                     //}
+
 
                     /* Process is ready */
                     if (Model.QFIFO[0].readinessTime <= Model.tickNumber)
@@ -361,7 +377,8 @@ namespace Model_Lab
                             /* [waitProcesses] does not have current process */
                             if (!isProcess)
                             {
-                                outString += " -";
+                                // -
+                                outString += " Б";
                             }
                         }
                         Model.Tracer.AnyTrace(outString);
@@ -380,11 +397,28 @@ namespace Model_Lab
                         /* Adding new process */
                         if (Model.allSjfProcesses.Count > 0)
                         {
-                            Model.waitProcesses.Add(new Process(Model.allSjfProcesses[0].number,
-                                                                Model.allSjfProcesses[0].readinessTime,
-                                                                Model.allSjfProcesses[0].requiredAmount,
-                                                                Model.allSjfProcesses[0].priority));
-                            Model.allSjfProcesses.RemoveAt(0);
+                            for (int k = 0; k < Model.allSjfProcesses.Count; k++)
+                            {
+                                bool isProcessWithCurrentNumber = false;
+                                for (int j = 0; j < Model.waitProcesses.Count; j++)
+                                {
+                                    if (Model.waitProcesses[j].number == Model.allSjfProcesses[k].number)
+                                    {
+                                        isProcessWithCurrentNumber = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!isProcessWithCurrentNumber)
+                                {
+                                    Model.waitProcesses.Add(new Process(Model.allSjfProcesses[k].number,
+                                                                        Model.allSjfProcesses[k].readinessTime,
+                                                                        Model.allSjfProcesses[k].requiredAmount,
+                                                                        Model.allSjfProcesses[k].priority));
+                                    Model.allSjfProcesses.RemoveAt(k);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -416,7 +450,8 @@ namespace Model_Lab
                         }
                         else
                         {
-                            outString += " -";
+                            // -
+                            outString += " Б";
                         }
                     }
 
@@ -515,9 +550,9 @@ namespace Model_Lab
                 sw.Flush();
                 sw.WriteLine("Время выполнения FIFO: " + (double)Model.fifoExecTime / Model.maxNCP);
                 sw.Flush();
-                sw.WriteLine("Время ожидания FIFO: " + (double)Model.sjfWaitTime / Model.maxNCP);
+                sw.WriteLine("Время ожидания SJF: " + (double)Model.sjfWaitTime / Model.maxNCP);
                 sw.Flush();
-                sw.WriteLine("Время выполнения FIFO: " + (double)Model.sjfExecTime / Model.maxNCP);
+                sw.WriteLine("Время выполнения SJF: " + (double)Model.sjfExecTime / Model.maxNCP);
                 sw.Flush();
                 sw.Close();
             }

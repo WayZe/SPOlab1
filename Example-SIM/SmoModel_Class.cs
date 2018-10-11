@@ -34,6 +34,8 @@ namespace Model_Lab
         /* Tick number */
         int tickNumber;
 
+        int uniqueProcessAmount;
+
         List<String> fifoTrace = new List<String>();
         List<String> sjfTrace = new List<String>();
 
