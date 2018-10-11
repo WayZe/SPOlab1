@@ -34,7 +34,7 @@ namespace Model_Lab
         {
             #region Параметры модели
 
-            maxNCP = 20;
+            maxNCP = 10000;
             NCP = 0;
             tickNumber = 0;
             uniqueProcessAmount = 3;

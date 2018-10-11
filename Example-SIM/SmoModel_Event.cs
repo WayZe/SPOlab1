@@ -548,11 +548,11 @@ namespace Model_Lab
 
                 sw.WriteLine("Время ожидания FIFO: " + (double)Model.fifoWaitTime / Model.maxNCP);
                 sw.Flush();
-                sw.WriteLine("Время выполнения FIFO: " + (double)Model.fifoExecTime / Model.maxNCP);
+                sw.WriteLine("Время выполнения FIFO: " + ((double)Model.fifoExecTime + (double)Model.fifoWaitTime) / Model.maxNCP);
                 sw.Flush();
                 sw.WriteLine("Время ожидания SJF: " + (double)Model.sjfWaitTime / Model.maxNCP);
                 sw.Flush();
-                sw.WriteLine("Время выполнения SJF: " + (double)Model.sjfExecTime / Model.maxNCP);
+                sw.WriteLine("Время выполнения SJF: " + ((double)Model.sjfExecTime + (double)Model.sjfWaitTime) / Model.maxNCP);
                 sw.Flush();
                 sw.Close();
             }
